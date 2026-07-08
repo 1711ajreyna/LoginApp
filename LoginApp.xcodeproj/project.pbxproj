@@ -45,6 +45,11 @@
 			path = LoginAppUITests;
 			sourceTree = "<group>";
 		};
+		9473FA2B2FFC685100B6BD8E /* Models */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Models;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +80,7 @@
 		9473F9E62FFC5FC500B6BD8E = {
 			isa = PBXGroup;
 			children = (
+				9473FA2B2FFC685100B6BD8E /* Models */,
 				9473F9F12FFC5FC500B6BD8E /* LoginApp */,
 				9473F9FF2FFC5FC700B6BD8E /* LoginAppTests */,
 				9473FA092FFC5FC700B6BD8E /* LoginAppUITests */,
@@ -109,6 +115,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				9473F9F12FFC5FC500B6BD8E /* LoginApp */,
+				9473FA2B2FFC685100B6BD8E /* Models */,
 			);
 			name = LoginApp;
 			packageProductDependencies = (

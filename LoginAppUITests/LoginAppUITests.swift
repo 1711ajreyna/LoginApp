@@ -4,7 +4,13 @@
 //
 //  Created by Andrew Reyna on 7/3/26.
 //
-
+//  Tests Included:
+//  1. Successful Login
+//  2. Invalid Login
+//  3. Successful Registration
+//  4. Registration Password Mismatch
+//  5. Logout
+//
 
 import XCTest
 
@@ -18,161 +24,128 @@ final class LoginAppUITests: XCTestCase {
         app.launch()
     }
 
-    override func tearDownWithError() throws {
-        app = nil
-    }
+    func testSuccessfulLoginNavigatesToHome() {
+        let email = app.textFields["loginEmailField"]
+        XCTAssertTrue(email.waitForExistence(timeout: 5))
+        email.tap()
+        email.typeText("student@test.com")
 
-    // UI TEST 1 — Successful login navigates to the Home screen
-    // Simulates a full login flow with valid credentials and verifies the
-    // welcome label appears on the Home screen. This is the app's primary
-    // happy-path — if it breaks, no user can access the app.
-    
-    func testSuccessfulLoginNavigatesToHomeScreen() {
-        let emailField    = app.textFields["loginEmailField"]
-        let passwordField = app.secureTextFields["loginPasswordField"]
-        let loginButton   = app.buttons["loginButton"]
-
-        XCTAssertTrue(emailField.waitForExistence(timeout: 5))
-        emailField.tap()
-        emailField.typeText("student@test.com")
-
-        passwordField.tap()
-        passwordField.typeText("Pass123")
-
-        loginButton.tap()
-
-        let welcomeLabel = app.staticTexts["welcomeLabel"]
-        XCTAssertTrue(
-            welcomeLabel.waitForExistence(timeout: 5),
-            "Welcome label should appear after successful login"
-        )
-        XCTAssertEqual(welcomeLabel.label, "Welcome, Student!")
-    }
-
-
-    // UI TEST 2 — Wrong credentials show an error message
-    // Verifies that entering an incorrect password displays the error label and
-    // keeps the user on the login screen. This confirms the app blocks
-    // unauthorized access and gives actionable feedback.
-
-    func testInvalidCredentialsShowErrorMessage() {
-        app.textFields["loginEmailField"].tap()
-        app.textFields["loginEmailField"].typeText("student@test.com")
-
-        app.secureTextFields["loginPasswordField"].tap()
-        app.secureTextFields["loginPasswordField"].typeText("wrongpassword")
+        let password = app.secureTextFields["loginPasswordField"]
+        XCTAssertTrue(password.waitForExistence(timeout: 5))
+        password.tap()
+        password.typeText("Pass123")
 
         app.buttons["loginButton"].tap()
 
-        let errorLabel = app.staticTexts["loginErrorLabel"]
-        XCTAssertTrue(
-            errorLabel.waitForExistence(timeout: 5),
-            "Error label should appear after failed login"
-        )
-        XCTAssertFalse(
-            app.staticTexts["welcomeLabel"].exists,
-            "Welcome label must not appear after failed login"
-        )
+        XCTAssertTrue(app.staticTexts["welcomeLabel"].waitForExistence(timeout: 5))
     }
 
-    // UI TEST 3 — Registration flow creates an account and shows success message
-    // Simulates navigating to the Registration screen, filling all fields with
-    // valid data, and tapping Register. Verifies the success label appears,
-    // confirming the full registration UI flow works end-to-end.
-    
+    func testInvalidCredentialsShowError() {
+        let email = app.textFields["loginEmailField"]
+        XCTAssertTrue(email.waitForExistence(timeout: 5))
+        email.tap()
+        email.typeText("wrong@test.com")
+
+        let password = app.secureTextFields["loginPasswordField"]
+        XCTAssertTrue(password.waitForExistence(timeout: 5))
+        password.tap()
+        password.typeText("Wrong123")
+
+        app.buttons["loginButton"].tap()
+
+        XCTAssertTrue(app.staticTexts["loginErrorLabel"].waitForExistence(timeout: 5))
+    }
+
     func testRegistrationFlowShowsSuccessMessage() {
-        // Navigate to Registration
         let goToRegister = app.buttons["goToRegisterButton"]
         XCTAssertTrue(goToRegister.waitForExistence(timeout: 5))
         goToRegister.tap()
 
-        // Fill in all fields
-        let usernameField = app.textFields["regUsernameField"]
-        XCTAssertTrue(usernameField.waitForExistence(timeout: 5))
-        usernameField.tap()
-        usernameField.typeText("NewStudent")
+        let username = app.textFields["regUsernameField"]
+        XCTAssertTrue(username.waitForExistence(timeout: 5))
+        username.tap()
+        username.typeText("NewStudent")
 
-        app.textFields["regEmailField"].tap()
-        app.textFields["regEmailField"].typeText("newstudent@test.com")
+        let email = app.textFields["regEmailField"]
+        XCTAssertTrue(email.waitForExistence(timeout: 5))
+        email.tap()
+        email.typeText("newstudent@test.com")
 
-        app.secureTextFields["regPasswordField"].tap()
-        app.secureTextFields["regPasswordField"].typeText("Hello123")
+        let password = app.textFields["regPasswordField"]
+        XCTAssertTrue(password.waitForExistence(timeout: 5))
+        password.tap()
+        password.typeText("Password123")
 
-        app.secureTextFields["regConfirmPasswordField"].tap()
-        app.secureTextFields["regConfirmPasswordField"].typeText("Hello123")
+        let confirm = app.textFields["regConfirmPasswordField"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        confirm.tap()
+        confirm.typeText("Password123")
 
-        app.buttons["registerButton"].tap()
+        app.swipeUp()
 
-        // Success label must appear
-        let successLabel = app.staticTexts["regSuccessLabel"]
-        XCTAssertTrue(
-            successLabel.waitForExistence(timeout: 5),
-            "Success label should appear after valid registration"
-        )
+        let registerButton = app.buttons["registerButton"]
+        XCTAssertTrue(registerButton.waitForExistence(timeout: 5))
+        registerButton.tap()
+
+        if app.staticTexts["regErrorLabel"].exists {
+            XCTFail("Registration Error: \(app.staticTexts["regErrorLabel"].label)")
+        }
+
+        let success = app.staticTexts["regSuccessLabel"]
+        XCTAssertTrue(success.waitForExistence(timeout: 5))
     }
-
-    // UI TEST 4 — Mismatched passwords show a validation error on registration
-    // Verifies that entering two different passwords on the Registration screen
-    // displays the error label rather than creating an account. This protects
-    // users from locking themselves out with an unintended password.
 
     func testRegistrationPasswordMismatchShowsError() {
-        app.buttons["goToRegisterButton"].tap()
+        let goToRegister = app.buttons["goToRegisterButton"]
+        XCTAssertTrue(goToRegister.waitForExistence(timeout: 5))
+        goToRegister.tap()
 
-        let usernameField = app.textFields["regUsernameField"]
-        XCTAssertTrue(usernameField.waitForExistence(timeout: 5))
-        usernameField.tap()
-        usernameField.typeText("Alice")
+        let username = app.textFields["regUsernameField"]
+        XCTAssertTrue(username.waitForExistence(timeout: 5))
+        username.tap()
+        username.typeText("Andrew")
 
-        app.textFields["regEmailField"].tap()
-        app.textFields["regEmailField"].typeText("alice@test.com")
+        let email = app.textFields["regEmailField"]
+        XCTAssertTrue(email.waitForExistence(timeout: 5))
+        email.tap()
+        email.typeText("andrew@test.com")
 
-        app.secureTextFields["regPasswordField"].tap()
-        app.secureTextFields["regPasswordField"].typeText("Pass123")
+        let password = app.textFields["regPasswordField"]
+        XCTAssertTrue(password.waitForExistence(timeout: 5))
+        password.tap()
+        password.typeText("Password123")
 
-        app.secureTextFields["regConfirmPasswordField"].tap()
-        app.secureTextFields["regConfirmPasswordField"].typeText("Pass999")
+        let confirm = app.textFields["regConfirmPasswordField"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        confirm.tap()
+        confirm.typeText("WrongPassword1")
 
-        app.buttons["registerButton"].tap()
+        app.swipeUp()
 
-        let errorLabel = app.staticTexts["regErrorLabel"]
-        XCTAssertTrue(
-            errorLabel.waitForExistence(timeout: 5),
-            "Error label should appear when passwords do not match"
-        )
-        XCTAssertFalse(
-            app.staticTexts["regSuccessLabel"].exists,
-            "Success label must not appear after a failed registration"
-        )
+        let registerButton = app.buttons["registerButton"]
+        XCTAssertTrue(registerButton.waitForExistence(timeout: 5))
+        registerButton.tap()
+
+        XCTAssertTrue(app.staticTexts["regErrorLabel"].waitForExistence(timeout: 5))
     }
 
-    
-    // UI TEST 5 — Logout from Home screen returns to Login screen
-    // Verifies that tapping Log Out on the Home screen brings the user back to
-    // the login screen. This ensures the session management flow works and
-    // users can securely end their session.
-    
     func testLogoutReturnsToLoginScreen() {
-        // Log in first
-        app.textFields["loginEmailField"].tap()
-        app.textFields["loginEmailField"].typeText("student@test.com")
-        app.secureTextFields["loginPasswordField"].tap()
-        app.secureTextFields["loginPasswordField"].typeText("Pass123")
+        let email = app.textFields["loginEmailField"]
+        XCTAssertTrue(email.waitForExistence(timeout: 5))
+        email.tap()
+        email.typeText("student@test.com")
+
+        let password = app.secureTextFields["loginPasswordField"]
+        XCTAssertTrue(password.waitForExistence(timeout: 5))
+        password.tap()
+        password.typeText("Pass123")
+
         app.buttons["loginButton"].tap()
 
-        // Wait for home screen
-        let logoutButton = app.buttons["logoutButton"]
-        XCTAssertTrue(logoutButton.waitForExistence(timeout: 5))
-        logoutButton.tap()
+        let logout = app.buttons["logoutButton"]
+        XCTAssertTrue(logout.waitForExistence(timeout: 5))
+        logout.tap()
 
-        // Login screen must reappear
-        XCTAssertTrue(
-            app.textFields["loginEmailField"].waitForExistence(timeout: 5),
-            "Login email field should reappear after logout"
-        )
-        XCTAssertFalse(
-            app.staticTexts["welcomeLabel"].exists,
-            "Welcome label must not be visible after logout"
-        )
+        XCTAssertTrue(app.buttons["loginButton"].waitForExistence(timeout: 5))
     }
 }

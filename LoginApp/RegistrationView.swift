@@ -14,86 +14,96 @@ struct RegistrationView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 20) {
+        ScrollView {
+            VStack(spacing: 20) {
 
-            // -- Header --
-            Image(systemName: "person.badge.plus")
-                .font(.system(size: 60))
-                .foregroundStyle(.indigo)
+                Image(systemName: "person.badge.plus")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.indigo)
 
-            Text("Create Account")
-                .font(.largeTitle.bold())
+                Text("Create Account")
+                    .font(.largeTitle.bold())
 
-            // -- Fields --
-            VStack(spacing: 14) {
-                TextField("Username", text: $vm.regUsername)
-                    .textFieldStyle(.roundedBorder)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .accessibilityIdentifier("regUsernameField")
+                VStack(spacing: 14) {
+                    TextField("Username", text: $vm.regUsername)
+                        .textFieldStyle(.roundedBorder)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .accessibilityIdentifier("regUsernameField")
 
-                TextField("Email", text: $vm.regEmail)
-                    .textFieldStyle(.roundedBorder)
-                    .keyboardType(.emailAddress)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .accessibilityIdentifier("regEmailField")
+                    TextField("Email", text: $vm.regEmail)
+                        .textFieldStyle(.roundedBorder)
+                        .keyboardType(.emailAddress)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .accessibilityIdentifier("regEmailField")
 
-                SecureField("Password", text: $vm.regPassword)
-                    .textFieldStyle(.roundedBorder)
-                    .accessibilityIdentifier("regPasswordField")
+                    TextField("Password", text: $vm.regPassword)
+                        .textFieldStyle(.roundedBorder)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .accessibilityIdentifier("regPasswordField")
 
-                SecureField("Confirm Password", text: $vm.regConfirmPassword)
-                    .textFieldStyle(.roundedBorder)
-                    .accessibilityIdentifier("regConfirmPasswordField")
+                    TextField("Confirm Password", text: $vm.regConfirmPassword)
+                        .textFieldStyle(.roundedBorder)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .accessibilityIdentifier("regConfirmPasswordField")
+                }
+                .padding(.horizontal)
+
+                if !vm.regError.isEmpty {
+                    Text(vm.regError)
+                        .foregroundStyle(.red)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                        .accessibilityIdentifier("regErrorLabel")
+                }
+
+                if vm.isRegistered {
+                    Text("Account created! You can now log in.")
+                        .foregroundStyle(.green)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                        .accessibilityIdentifier("regSuccessLabel")
+                }
+
+                Button(action: {
+                    vm.register()
+                }) {
+                    Text("Register")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.indigo)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal)
+                .accessibilityIdentifier("registerButton")
+
+                Button(action: {
+                    vm.resetRegistration()
+                    dismiss()
+                }) {
+                    Text("Already have an account? **Log In**")
+                        .font(.subheadline)
+                }
+                .accessibilityIdentifier("backToLoginButton")
+
+                Spacer(minLength: 40)
             }
-            .padding(.horizontal)
-
-            // -- Validation message --
-            if !vm.regError.isEmpty {
-                Text(vm.regError)
-                    .foregroundStyle(.red)
-                    .font(.subheadline)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                    .accessibilityIdentifier("regErrorLabel")
-            }
-
-            // -- Success message --
-            if vm.isRegistered {
-                Text("Account created! You can now log in.")
-                    .foregroundStyle(.green)
-                    .font(.subheadline)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                    .accessibilityIdentifier("regSuccessLabel")
-            }
-
-            // -- Register button --
-            Button(action: { vm.register() }) {
-                Text("Register")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.indigo)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .padding(.horizontal)
-            .accessibilityIdentifier("registerButton")
-
-            // -- Back to login --
-            Button(action: {
-                vm.resetRegistration()
-                dismiss()
-            }) {
-                Text("Already have an account? **Log In**")
-                    .font(.subheadline)
-            }
-            .accessibilityIdentifier("backToLoginButton")
-
-            Spacer()
+            .padding(.top, 32)
         }
-        .padding(.top, 32)
+        .onTapGesture {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil,
+                from: nil,
+                for: nil
+            )
+        }
         .navigationTitle("Register")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -101,6 +111,7 @@ struct RegistrationView: View {
 
 #Preview {
     NavigationStack {
-        RegistrationView().environmentObject(AuthViewModel())
+        RegistrationView()
+            .environmentObject(AuthViewModel())
     }
 }
